@@ -44,6 +44,7 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
+
   test-action:
     name: GitHub Actions Test
     runs-on: ubuntu-latest
@@ -57,8 +58,13 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
-
+          certBase64Encoded: ${{ secrets.CERT_BASE64_ENCODED }}
+          clientId: ${{ secrets.CLIENT_ID }}
+          packagePath:  ${{ github.workspace }}\react-banner.sppkg
+          scopes: ${{ secrets.SCOPES}}
+          siteUrl: ${{ secrets.SITE_URL }}
+          tenantId: ${{ secrets.TENANT_ID }}
+          thumbprint: ${{ secrets.THUMBPRINT }}
       - name: Print Output
         id: output
         run: echo "${{ steps.test-action.outputs.time }}"

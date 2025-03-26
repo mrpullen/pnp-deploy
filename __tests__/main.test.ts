@@ -1,62 +1,89 @@
-/**
- * Unit tests for the action's main functionality, src/main.ts
- *
- * To mock dependencies in ESM, you can create fixtures that export mock
- * functions and objects. For example, the core module is mocked in this test,
- * so that the actual '@actions/core' module is not imported.
- */
-import { jest } from '@jest/globals'
-import * as core from '../__fixtures__/core.js'
-import { wait } from '../__fixtures__/wait.js'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { run } from '../src/main'
+import * as core from '@actions/core'
+import * as fs from 'fs'
+import { SPFI } from '@pnp/sp'
 
-// Mocks should be declared before the module being tested is imported.
-jest.unstable_mockModule('@actions/core', () => core)
-jest.unstable_mockModule('../src/wait.js', () => ({ wait }))
+jest.mock('@actions/core')
+jest.mock('fs')
+jest.mock('@pnp/sp')
 
-// The module being tested should be imported dynamically. This ensures that the
-// mocks are used in place of any actual dependencies.
-const { run } = await import('../src/main.js')
-
-describe('main.ts', () => {
+describe('run', () => {
   beforeEach(() => {
-    // Set the action's inputs as return values from core.getInput().
-    core.getInput.mockImplementation(() => '500')
-
-    // Mock the wait function so that it does not actually wait.
-    wait.mockImplementation(() => Promise.resolve('done!'))
+    jest.clearAllMocks()
   })
 
-  afterEach(() => {
-    jest.resetAllMocks()
-  })
+  it('should successfully execute the action', async () => {
+    const mockGetInput = core.getInput as jest.Mock
+    const mockSetOutput = core.setOutput as jest.Mock
+    const mockDebug = core.debug as jest.Mock
+    const mockSetFailed = core.setFailed as jest.Mock
+    const mockReadFileSync = fs.readFileSync as jest.Mock
+    const mockAdd = jest.fn()
 
-  it('Sets the time output', async () => {
+    mockGetInput.mockImplementation((name: string) => {
+      const inputs: Record<string, string> = {
+        siteUrl: 'https://example.sharepoint.com',
+        scopes: 'scope1,scope2',
+        tenantId: 'tenant-id',
+        clientId: 'client-id',
+        thumbprint: 'thumbprint',
+        packagePath: '/path/to/package.sppkg',
+        certBase64Encoded: 'mock-cert-base64'
+      }
+      return inputs[name]
+    })
+
+    mockReadFileSync.mockReturnValue(Buffer.from('mock file content'))
+    ;(SPFI.prototype.web as any) = {
+      appcatalog: {
+        add: mockAdd.mockResolvedValue({ success: true })
+      }
+    }
+
     await run()
 
-    // Verify the time output was set.
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      // Simple regex to match a time string in the format HH:MM:SS.
-      expect.stringMatching(/^\d{2}:\d{2}:\d{2}/)
+    expect(mockDebug).toHaveBeenCalledWith('Getting Input Options')
+    expect(mockDebug).toHaveBeenCalledWith(
+      JSON.stringify(
+        {
+          siteUrl: 'https://example.sharepoint.com',
+          scopes: ['scope1', 'scope2'],
+          tenantId: 'tenant-id',
+          clientId: 'client-id',
+          thumbprint: 'thumbprint',
+          packagePath: '/path/to/package.sppkg'
+        },
+        null,
+        4
+      )
     )
+    expect(mockDebug).toHaveBeenCalledWith(
+      'CertBase64 - should be protectedmock-cert-base64'
+    )
+    expect(mockDebug).toHaveBeenCalledWith('Configuring PnP SPFI')
+    expect(mockAdd).toHaveBeenCalledWith(
+      'package.sppkg',
+      Buffer.from('mock file content'),
+      true
+    )
+    expect(mockSetOutput).toHaveBeenCalledWith(
+      'result',
+      JSON.stringify({ success: true }, null, 4)
+    )
+    expect(mockSetFailed).not.toHaveBeenCalled()
   })
 
-  it('Sets a failed status', async () => {
-    // Clear the getInput mock and return an invalid value.
-    core.getInput.mockClear().mockReturnValueOnce('this is not a number')
+  it('should fail the action if an error occurs', async () => {
+    const mockSetFailed = core.setFailed as jest.Mock
+    const mockGetInput = core.getInput as jest.Mock
 
-    // Clear the wait mock and return a rejected promise.
-    wait
-      .mockClear()
-      .mockRejectedValueOnce(new Error('milliseconds is not a number'))
+    mockGetInput.mockImplementation(() => {
+      throw new Error('Mock error')
+    })
 
     await run()
 
-    // Verify that the action was marked as failed.
-    expect(core.setFailed).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds is not a number'
-    )
+    expect(mockSetFailed).toHaveBeenCalledWith('Mock error')
   })
 })
