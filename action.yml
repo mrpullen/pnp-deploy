@@ -9,15 +9,32 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  tenantId:
+    description: Tenant Id for the SharePoint Online Tenant
     required: true
-    default: '1000'
+  clientId:
+    description: Client Id for the Azure AD App Registration
+    required: true
+  siteUrl:
+    description: The URL of the SharePoint site to deploy the package to
+    required: true
+  packagePath:
+    description: The path to the SPFx package to deploy
+    required: true
+  certBase64Encoded:
+    description: Base64 encoded certificate for the Azure AD App Registration
+    required: true
+  thumbprint:
+    description: Thumbprint of the certificate for the Azure AD App Registration
+    required: true
+  scopes:
+    description: List of scopes to use - seperated by comman.
+    required: true
 
 # Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  result:
+    description: The result of the deployment
 
 runs:
   using: node20
