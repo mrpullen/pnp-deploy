@@ -100,10 +100,12 @@ export async function run(): Promise<void> {
     core.debug('CertBase64 - should be protected' + certBase64Encoded)
     core.debug('Configuring PnP SPFI')
     const sp = initSPFI(options, certBase64Encoded)
-
+    core.debug('Reading Package File')
     const fileBuffer = readPackageFile(options)
+    core.debug('Retrieving File Name')
     const fileName = getFileName(options.packagePath)
 
+    core.debug(`Adding File to App Catalog ${fileName}`)
     const result = await sp.web.appcatalog.add(fileName, fileBuffer, true)
 
     core.setOutput('result', JSON.stringify(result, null, 4))
