@@ -47,6 +47,16 @@ const initSPFI = (
   options: IPnPDeployOptions,
   certBase64Encoded: string
 ): SPFI => {
+  core.debug('Initializing SPFI')
+  core.debug(`SiteUrl: ${options.siteUrl}`)
+  core.debug(`Scopes: ${options.scopes}`)
+  core.debug(`TenantId: ${options.tenantId}`)
+  core.debug(`ClientId: ${options.clientId}`)
+  core.debug(`Thumbprint: ${options.thumbprint}`)
+  core.debug(
+    `Authority: https://login.microsoftonline.com/${options.tenantId}/`
+  )
+
   const sp = spfi().using(
     SPDefault({
       baseUrl: `${options.siteUrl}`,
