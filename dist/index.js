@@ -46360,6 +46360,13 @@ const getCertBase64Encoded = () => {
     return certBase64Encoded;
 };
 const initSPFI = (options, certBase64Encoded) => {
+    coreExports.debug('Initializing SPFI');
+    coreExports.debug(`SiteUrl: ${options.siteUrl}`);
+    coreExports.debug(`Scopes: ${options.scopes}`);
+    coreExports.debug(`TenantId: ${options.tenantId}`);
+    coreExports.debug(`ClientId: ${options.clientId}`);
+    coreExports.debug(`Thumbprint: ${options.thumbprint}`);
+    coreExports.debug(`Authority: https://login.microsoftonline.com/${options.tenantId}/`);
     const sp = spfi().using(SPDefault({
         baseUrl: `${options.siteUrl}`,
         msal: {
@@ -46405,8 +46412,11 @@ async function run() {
         coreExports.debug('CertBase64 - should be protected' + certBase64Encoded);
         coreExports.debug('Configuring PnP SPFI');
         const sp = initSPFI(options, certBase64Encoded);
+        coreExports.debug('Reading Package File');
         const fileBuffer = readPackageFile(options);
+        coreExports.debug('Retrieving File Name');
         const fileName = getFileName(options.packagePath);
+        coreExports.debug(`Adding File to App Catalog ${fileName}`);
         const result = await sp.web.appcatalog.add(fileName, fileBuffer, true);
         coreExports.setOutput('result', JSON.stringify(result, null, 4));
     }
