@@ -83,6 +83,8 @@ const initSPFI = (
 const readPackageFile = (options: IPnPDeployOptions): Buffer => {
   try {
     const fileBuffer = readFileSync(options.packagePath)
+    core.debug(`File Length: ${fileBuffer.byteLength}`)
+
     return fileBuffer
   } catch (error) {
     throw new Error(
