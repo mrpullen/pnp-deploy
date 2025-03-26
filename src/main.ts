@@ -4,6 +4,8 @@ import '@pnp/sp/webs'
 import '@pnp/sp/appcatalog'
 import { SPDefault } from '@pnp/nodejs'
 import { readFileSync } from 'fs'
+import path from 'path'
+
 export interface IPnPDeployOptions {
   siteUrl: string
   scopes: Array<string>
@@ -89,9 +91,10 @@ const readPackageFile = (options: IPnPDeployOptions): Buffer => {
   }
 }
 
-const getFileName = (path: string): string => {
-  const parts = path.split('/')
-  return parts[parts.length - 1]
+const getFileName = (filePath: string): string => {
+  const filename = path.basename(filePath)
+  core.debug(`File Name: ${filename}`)
+  return filename
 }
 
 /**
