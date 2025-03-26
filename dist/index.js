@@ -46388,15 +46388,17 @@ const initSPFI = (options, certBase64Encoded) => {
 const readPackageFile = (options) => {
     try {
         const fileBuffer = readFileSync(options.packagePath);
+        coreExports.debug(`File Length: ${fileBuffer.byteLength}`);
         return fileBuffer;
     }
     catch (error) {
         throw new Error(`Error reading file: (${options.packagePath}) - ${JSON.stringify(error, null, 4)}`);
     }
 };
-const getFileName = (path) => {
-    const parts = path.split('/');
-    return parts[parts.length - 1];
+const getFileName = (filePath) => {
+    const filename = require$$1$5.basename(filePath);
+    coreExports.debug(`File Name: ${filename}`);
+    return filename;
 };
 /**
  * The main function for the action.
