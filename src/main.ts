@@ -1,12 +1,9 @@
 import * as core from '@actions/core'
-
-import { SPDefault } from '@pnp/nodejs'
 import { SPFI, spfi } from '@pnp/sp'
-
-import '@pnp/sp/webs/index'
+import '@pnp/sp/webs'
 import '@pnp/sp/appcatalog'
+import { SPDefault } from '@pnp/nodejs'
 import { readFileSync } from 'fs'
-
 export interface IPnPDeployOptions {
   siteUrl: string
   scopes: Array<string>
@@ -16,7 +13,7 @@ export interface IPnPDeployOptions {
   packagePath: string
 }
 
-function getInputOptions(): IPnPDeployOptions {
+const getInputOptions = (): IPnPDeployOptions => {
   const requiredOption: core.InputOptions = {
     required: true,
     trimWhitespace: true
@@ -34,7 +31,7 @@ function getInputOptions(): IPnPDeployOptions {
   return options
 }
 
-function getCertBase64Encoded(): string {
+const getCertBase64Encoded = (): string => {
   const requiredOption: core.InputOptions = {
     required: true,
     trimWhitespace: true
@@ -46,7 +43,10 @@ function getCertBase64Encoded(): string {
   return certBase64Encoded
 }
 
-function initSPFI(options: IPnPDeployOptions, certBase64Encoded: string): SPFI {
+const initSPFI = (
+  options: IPnPDeployOptions,
+  certBase64Encoded: string
+): SPFI => {
   const sp = spfi().using(
     SPDefault({
       baseUrl: `${options.siteUrl}`,
@@ -68,7 +68,7 @@ function initSPFI(options: IPnPDeployOptions, certBase64Encoded: string): SPFI {
   return sp
 }
 
-function readPackageFile(options: IPnPDeployOptions): Buffer {
+const readPackageFile = (options: IPnPDeployOptions): Buffer => {
   try {
     const fileBuffer = readFileSync(options.packagePath)
     return fileBuffer
@@ -79,7 +79,7 @@ function readPackageFile(options: IPnPDeployOptions): Buffer {
   }
 }
 
-function getFileName(path: string): string {
+const getFileName = (path: string): string => {
   const parts = path.split('/')
   return parts[parts.length - 1]
 }
@@ -103,6 +103,7 @@ export async function run(): Promise<void> {
 
     const fileBuffer = readPackageFile(options)
     const fileName = getFileName(options.packagePath)
+
     const result = await sp.web.appcatalog.add(fileName, fileBuffer, true)
 
     core.setOutput('result', JSON.stringify(result, null, 4))
