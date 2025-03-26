@@ -38,12 +38,12 @@ function getCertBase64Encoded(): string {
   const requiredOption: core.InputOptions = {
     required: true,
     trimWhitespace: true
-  };
+  }
 
-  const certBase64Encoded = core.getInput('certBase64Encoded', requiredOption);
-  core.setSecret(certBase64Encoded);
+  const certBase64Encoded = core.getInput('certBase64Encoded', requiredOption)
+  core.setSecret(certBase64Encoded)
 
-  return certBase64Encoded;
+  return certBase64Encoded
 }
 
 function initSPFI(options: IPnPDeployOptions, certBase64Encoded: string): SPFI {
@@ -70,11 +70,12 @@ function initSPFI(options: IPnPDeployOptions, certBase64Encoded: string): SPFI {
 
 function readPackageFile(options: IPnPDeployOptions): Buffer {
   try {
-  const fileBuffer = readFileSync(options.packagePath)
-  return fileBuffer
-  }
-  catch (error) {
-    throw new Error(`Error reading file: (${options.packagePath}) - ${JSON.stringify(error, null, 4)}`)
+    const fileBuffer = readFileSync(options.packagePath)
+    return fileBuffer
+  } catch (error) {
+    throw new Error(
+      `Error reading file: (${options.packagePath}) - ${JSON.stringify(error, null, 4)}`
+    )
   }
 }
 
@@ -94,11 +95,11 @@ export async function run(): Promise<void> {
     const options = getInputOptions()
 
     core.debug(JSON.stringify(options, null, 4))
-    const certBase64Encoded = getCertBase64Encoded();
+    const certBase64Encoded = getCertBase64Encoded()
 
-    core.debug("CertBase64 - should be protected" + certBase64Encoded);
-    core.debug('Configuring PnP SPFI');
-    const sp = initSPFI(options, certBase64Encoded);
+    core.debug('CertBase64 - should be protected' + certBase64Encoded)
+    core.debug('Configuring PnP SPFI')
+    const sp = initSPFI(options, certBase64Encoded)
 
     const fileBuffer = readPackageFile(options)
     const fileName = getFileName(options.packagePath)

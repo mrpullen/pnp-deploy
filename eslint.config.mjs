@@ -76,7 +76,7 @@ export default [
       'no-shadow': 'off',
       'no-unused-vars': 'off',
       'prettier/prettier': 'error',
-      'semicolon-style': 'on'
+      'semicolon-style': 'off'
     }
   }
 ]
